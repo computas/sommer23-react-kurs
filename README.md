@@ -1,23 +1,26 @@
 # React workshop
 
-Denne workshopen består av flere oppgaver. De første oppgavene er de enkleste, men også de viktigste å mestre.
+Denne workshopen består av flere oppgaver. De første oppgavene er de enkleste, men også de viktigste å mestre. Mye av koden som trengs for å klare oppgavene gis i starten, men dette blir det mindre av etterhvert i de senere oppgavene. Det er også oppfordret å prøve å løse oppgavene uten å se på kode-snuttene.
 
 ## Oppgave 1 - Lage counter-knapp med props
 
 I denne oppgaven skal vi lage en `CounterButton` komponent, som skal brukes i `App.tsx` som har props for å lese og sette count. `App.tsx` skal da opptre som en container-komponent, og `CounterButton` komponenten opptrer som en state-less komponent.
 
 1. Kjør `npm install` for å installere alle dependencies.
+
 2. Lag en ny fil `CounterButton.tsx` og fyll inn boilerplaten for en ny React-komponent:
-``` jsx
-import React from 'react';
+
+```jsx
+import React from "react";
 
 export const CounterButton: React.FC = () => {
-  return <button>The count is { count }</button>
-}
+  return <button>The count is {count}</button>;
+};
 ```
 
 3. Lag et `interface` som sier hvilke props `CounterButton` har:
-``` ts
+
+```ts
 interface Props {
   count: number;
   onClick: () => void;
@@ -27,44 +30,95 @@ interface Props {
 4. Knytt det nye prop-interfacet til komponenten ved å endre `React.FC` til `React.FC<Props>`.
 
 5. Ta imot de nye propsene som argumenter:
-``` jsx
-export const CounterButton = React.FC<Props> = ({count, onClick}) => {
+
+```jsx
+export const CounterButton: React.FC<Props> = ({count, onClick}) => {
 ```
 
 6. Kall `onClick` funksjonen som kommer inn som en prop når brukeren klikker på knappen:
-``` html
-<button onClick={onClick}>The count is { count }</button>
+
+```html
+<button onClick="{onClick}">The count is { count }</button>
 ```
 
 7. Bruk den nye komponenten i `App.tsx`:
-``` html
-<CounterButton count={count} onClick={increaseCount} />
-<CounterButton count={count} onClick={increaseCount} />
+
+```html
+<CounterButton count="{count}" onClick="{increaseCount}" />
+<CounterButton count="{count}" onClick="{increaseCount}" />
 ```
 
 ## Oppgave 2 - Lage counter-knapp med `useContext`
 
-Denne oppgaven baserer seg på samme mål som i oppgave 1, men hvor vi heller skal bruke en service for å holde på og distribuere count. Dette er et alternativt pattern til inputs/outputs og kan være en fin måte å administrate state når UIet og/eller staten begynner å bli kompleks.
+Denne oppgaven baserer seg på samme mål som i oppgave 1, men hvor vi heller skal bruke `useContext` for å holde på og distribuere state. Dette er et alternativt pattern til props og kan være en fin måte å administrate state når komponent-treet og/eller staten begynner å bli kompleks.
 
-1. Lag en ny service ved hjelp av CLIen: `ng g s counter`
-2. Lag en ny komponent for knappen, hvis du ikke har gjort oppgave 1: `ng g c counter-button`
-3. Lag en ny `BehaviorSubject` i `CounterService` som skal holde på `count`, og eksponer en `Observable` og en funksjon for å sette en ny count verdi.
-4. Inject `CounterService` i knappe-komponenten, og kall på funksjonen for å sette ny count verdi når knappen klikkes på.
-5. Inject `CounterService` i `AppComponent` og subscribe til `count` observablen. Vis deretter denne verdien i HTMLen.
+1. Lag en ny fil `CounterContext.ts` for å holde på konteksten:
 
-## Oppgave 3 - Legge til breadcrumbs
+```ts
+import { createContext } from "react";
 
-I denne oppgaven ønsker vi å øve på å integrere med tredjeparts biblioteker, samt få en introduksjon til ELvia sitt designsystem.
+interface CounterState {
+  count: number;
+  onChange: () => void;
+}
 
-1. Legg til [Elvia breadcrumbs](https://design.elvia.io/components/breadcrumb) på toppen av siden (se app.component.html for å se hvor den skal plasseres).
+export const CounterContext = createContext<CounterState>({
+  count: 0,
+  onChange: () => {},
+});
+```
 
-## Oppgave 4 - Transformere data
+2. Bruk den nye contexten i `App.tsx`. Gjør dette ved å erstatte fragment-elementet (`<>`) som wrapper innholdet med `<CounterContext.Provider>` elementet.
 
-1. Lag din egen pipe for å transformere `count`. Count skal ganges med Pi og rundes av til 4 desimaler.
+3. Fyll ut `value` propen som er påkrevd på `CounterContext.Provider` elementet. Her vil vi da gi en referanse til `count` staten vi har, samt funksjonen vi allerede har for å øke count:
 
-## Oppgave 5 - For den erfarne front-end utvikleren
+```jsx
+<CounterContext.Provider value={{ count: count, onChange: increaseCount }}>
+```
 
-1. Lag en ny feature-modul med routing og en korresponderende container-komponent: `ng g m count-display --routing && ng g c count-display`.
-2. Lag en route til den nye feature-modulen i `app-routing.module.ts`, og lazy load den nye feature-modulen.
-3. Inject `CounterService` i `CountDisplayComponent` og vis nåværende count.
-4. Legg inn en `<router-outlet></router-outlet>` i `app.component.html` for å vise den nye routen.
+4. Fjern propsene `count` og `onClick` fra `CounterButton` elementet i `App.tsx`.
+
+5. Bruk `useContext` hooken i `CounterButton.tsx` for å hente counter contexten:
+
+```ts
+const { count, onChange } = useContext(CounterContext);
+```
+
+## Oppgave 3 - Legge til knappe-styling
+
+I denne oppgaven ønsker vi å øve på å style en React komponent, ved hjelp av CSS-moduler. Dette scoper CSSen til å kun fungere innenfor en komponent, og vil dermed forhindre at CSS ligger globalt i applikasjonen.
+
+1. Legg til en ny css fil for `CounterButton`, kalt `CounterButton.module.css`.
+
+2. Fyll inn CSS for knappen:
+
+```css
+.counterButton {
+  border-radius: 8px;
+  border: 1px solid var(--computas-primary);
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  font-family: inherit;
+  background-color: var(--computas-white);
+  color: var(--computas-primary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.counterButton:hover {
+  background-color: var(--computas-primary);
+  color: var(--computas-white);
+}
+```
+
+3. Importer den nye CSS-filen i `CounterButton.tsx`:
+
+```ts
+import styling from "./CounterButton.module.css";
+```
+
+4. Bruk denne stylingen på knappen:
+
+```jsx
+<button onClick={onChange} className={styling.counterButton}>
+```
