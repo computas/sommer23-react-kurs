@@ -37,15 +37,15 @@ export const CounterButton: React.FC<Props> = ({count, onClick}) => {
 
 6. Kall `onClick` funksjonen som kommer inn som en prop når brukeren klikker på knappen:
 
-```html
-<button onClick="{onClick}">The count is { count }</button>
+```jsx
+<button onClick={onClick}>The count is {count}</button>
 ```
 
 7. Bruk den nye komponenten i `App.tsx`:
 
-```html
-<CounterButton count="{count}" onClick="{increaseCount}" />
-<CounterButton count="{count}" onClick="{increaseCount}" />
+```jsx
+<CounterButton count={count} onClick={increaseCount} />
+<CounterButton count={count} onClick={increaseCount} />
 ```
 
 ## Oppgave 2 - Lage counter-knapp med `useContext`
